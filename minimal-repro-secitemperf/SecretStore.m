@@ -21,29 +21,9 @@ static NSString* const kKeyApplicationLabel = @"Strongbox-Credential-Store-Key";
 static NSString* const kEncryptedBlobServiceName = @"Strongbox-Credential-Store";
 static NSString* const kWrappedObjectObjectKey = @"theObject";
 
-@interface SecretStore ()
-
-@property BOOL _secureEnclaveAvailable;
-
-@end
-
 @implementation SecretStore
 
-+ (instancetype)sharedInstance {
-    static SecretStore *sharedInstance = nil;
-    static dispatch_once_t onceToken;
-    
-    dispatch_once(&onceToken, ^{
-        sharedInstance = [[SecretStore alloc] init];
-    });
-    
-    return sharedInstance;
-}
-
-///////////////////////////////////////////////////////////////////
-// Get
-
-- (NSString *)getSecureString:(NSString *)identifier {
++ (NSString *)getSecureString:(NSString *)identifier {
     // NSLog(@"XXXX - getSecureObject - [%@]", identifier);
     
     NSDictionary* wrapped = [self getWrappedObject:identifier];
@@ -55,9 +35,7 @@ static NSString* const kWrappedObjectObjectKey = @"theObject";
     return wrapped[kWrappedObjectObjectKey];
 }
     
-// Set
-
-- (BOOL)setSecureString:(NSString *)object forIdentifier:(NSString *)identifier {
++ (BOOL)setSecureString:(NSString *)object forIdentifier:(NSString *)identifier {
     [self deleteSecureItem:identifier]; // Clear any existing password first...
 
     if(object == nil) { // Nil is equivalent to delete
@@ -67,7 +45,7 @@ static NSString* const kWrappedObjectObjectKey = @"theObject";
     return [self wrapSerializeAndEncryptObject:object forIdentifier:identifier];
 }
 
-- (BOOL)wrapSerializeAndEncryptObject:(id)object
++ (BOOL)wrapSerializeAndEncryptObject:(id)object
                         forIdentifier:(NSString *)identifier {
     SecAccessControlRef access = [SecretStore createAccessControl];
     if(!access) {
@@ -142,7 +120,7 @@ static NSString* const kWrappedObjectObjectKey = @"theObject";
 
 // Delete
 
-- (void)deleteSecureItem:(NSString *)identifier {
++ (void)deleteSecureItem:(NSString *)identifier {
     [self deleteKeychainBlob:identifier];
     
     NSDictionary* query = [SecretStore getPrivateKeyQuery:identifier limit1Match:NO];
@@ -248,7 +226,7 @@ static NSString* const kWrappedObjectObjectKey = @"theObject";
     return ret;
 }
 
-- (NSDictionary*)getWrappedObject:(NSString *)identifier {
++ (NSDictionary*)getWrappedObject:(NSString *)identifier {
     BOOL itemNotFound;
     NSData* keychainBlob = [self getKeychainBlob:identifier itemNotFound:&itemNotFound];
     
@@ -265,7 +243,7 @@ static NSString* const kWrappedObjectObjectKey = @"theObject";
     return [self decryptAndDeserializeKeychainBlob:keychainBlob identifier:identifier];
 }
 
-- (NSDictionary*)decryptAndDeserializeKeychainBlob:(NSData*)encrypted identifier:(NSString *)identifier {
++ (NSDictionary*)decryptAndDeserializeKeychainBlob:(NSData*)encrypted identifier:(NSString *)identifier {
     NSTimeInterval startTime = NSDate.timeIntervalSinceReferenceDate;
 
     NSDictionary* query = [SecretStore getPrivateKeyQuery:identifier limit1Match:YES];
@@ -316,7 +294,7 @@ static NSString* const kWrappedObjectObjectKey = @"theObject";
     return wrapped;
 }
 
-- (NSDictionary*)decryptWrappedObject:(NSData*)encrypted privateKey:(SecKeyRef)privateKey {
++ (NSDictionary*)decryptWrappedObject:(NSData*)encrypted privateKey:(SecKeyRef)privateKey {
     CFErrorRef cfError = nil;
     SecKeyAlgorithm algorithm = [SecretStore algorithm];
     CFDataRef pt = SecKeyCreateDecryptedData(privateKey, algorithm, (CFDataRef)encrypted, &cfError);
@@ -345,11 +323,11 @@ static NSString* const kWrappedObjectObjectKey = @"theObject";
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// //
 // Encrypted Blob Storage...
 
-- (NSDictionary*)wrapObject:(id)object identifier:(NSString*)identifier {
++ (NSDictionary*)wrapObject:(id)object identifier:(NSString*)identifier {
     return @{ kWrappedObjectObjectKey : object };
 }
 
-- (BOOL)storeKeychainBlob:(NSString*)identifier encrypted:(NSData*)encrypted {
++ (BOOL)storeKeychainBlob:(NSString*)identifier encrypted:(NSData*)encrypted {
     NSDictionary* searchQuery = [self getBlobQuery:identifier];
     OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)searchQuery, nil);
     
@@ -377,7 +355,7 @@ static NSString* const kWrappedObjectObjectKey = @"theObject";
     return (status == errSecSuccess);
 }
 
-- (NSData*)getKeychainBlob:(NSString*)identifier itemNotFound:(BOOL*)itemNotFound {
++ (NSData*)getKeychainBlob:(NSString*)identifier itemNotFound:(BOOL*)itemNotFound {
     NSTimeInterval startDecryptTime = NSDate.timeIntervalSinceReferenceDate;
         
     NSMutableDictionary *query = [self getBlobQuery:identifier];
@@ -413,7 +391,7 @@ static NSString* const kWrappedObjectObjectKey = @"theObject";
     }
 }
 
-- (void)deleteKeychainBlob:(NSString*)identifier {
++ (void)deleteKeychainBlob:(NSString*)identifier {
     NSMutableDictionary *query = [self getBlobQuery:identifier];
     
 //    NSLog(@"deleteKeychainBlob: Enter");
@@ -425,7 +403,7 @@ static NSString* const kWrappedObjectObjectKey = @"theObject";
 //    NSLog(@"deleteKeychainBlob: Exit %d", (int)status);
 }
 
-- (NSMutableDictionary*)getBlobQuery:(NSString*)identifier {
++ (NSMutableDictionary*)getBlobQuery:(NSString*)identifier {
     NSString* blobId = [NSString stringWithFormat:@"strongbox-credential-store-encrypted-blob-%@", identifier];
 
     NSMutableDictionary *dictionary = [NSMutableDictionary dictionaryWithCapacity:4];

@@ -22,13 +22,13 @@ static NSString* const kIdentifier = @"foo";
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    [SecretStore.sharedInstance setSecureString:kString forIdentifier:kIdentifier];
+    [SecretStore setSecureString:kString forIdentifier:kIdentifier];
 }
 
 - (IBAction)onGetSecret:(id)sender {
     NSTimeInterval startTime = NSDate.timeIntervalSinceReferenceDate;
 
-    id obj = [SecretStore.sharedInstance getSecureString:kIdentifier];
+    id obj = [SecretStore getSecureString:kIdentifier];
     
     NSTimeInterval perf = NSDate.timeIntervalSinceReferenceDate - startTime;
     

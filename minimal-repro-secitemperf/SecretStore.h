@@ -12,11 +12,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface SecretStore : NSObject
 
-+ (instancetype)sharedInstance;
++ (BOOL)setSecureString:(NSString* _Nullable)string forIdentifier:(NSString*)identifier;
 
-- (BOOL)setSecureString:(NSString* _Nullable)string forIdentifier:(NSString*)identifier;
-
-- (NSString*_Nullable)getSecureString:(NSString*)identifier;
++ (NSString*_Nullable)getSecureString:(NSString*)identifier;
 
 @end
 
