@@ -11,24 +11,26 @@
 @interface ViewController ()
 
 @property (weak, nonatomic) IBOutlet UILabel *label;
+@property NSString* identifier;
 
 @end
 
 static NSString* const kString = @"bar";
-static NSString* const kIdentifier = @"foo";
 
 @implementation ViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    [SecretStore setSecureString:kString forIdentifier:kIdentifier];
+    self.identifier = NSUUID.UUID.UUIDString;
+    
+    [SecretStore setSecureString:kString forIdentifier:self.identifier];
 }
 
 - (IBAction)onGetSecret:(id)sender {
     NSTimeInterval startTime = NSDate.timeIntervalSinceReferenceDate;
 
-    id obj = [SecretStore getSecureString:kIdentifier];
+    id obj = [SecretStore getSecureString:self.identifier];
     
     NSTimeInterval perf = NSDate.timeIntervalSinceReferenceDate - startTime;
     
