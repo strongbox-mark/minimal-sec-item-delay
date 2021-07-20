@@ -167,7 +167,12 @@ static NSString* const kEncryptedBlobServiceName = @"Strongbox-Credential-Store"
     NSDictionary* query = [SecretStore getPrivateKeyQuery:identifier limit1Match:YES];
 
     CFTypeRef pk;
+    
+    NSLog(@"QQQQQQQQQQ decrypt START");
+
     OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, &pk);
+
+    NSLog(@"QQQQQQQQQQ decrypt END");
 
     if( status != errSecSuccess ) {
         NSLog(@"Error getting key.... status = [%d]", (int)status);
@@ -245,7 +250,13 @@ static NSString* const kEncryptedBlobServiceName = @"Strongbox-Credential-Store"
 
     CFTypeRef result = NULL;
     
+    
+    NSLog(@"QQQQQQQQQQ getEncryptedFromKeychain START");
+
     OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, &result);
+
+    NSLog(@"QQQQQQQQQQ getEncryptedFromKeychain END");
+    
     
     if ( status == errSecSuccess ) {
         return (__bridge_transfer NSData *)result;
