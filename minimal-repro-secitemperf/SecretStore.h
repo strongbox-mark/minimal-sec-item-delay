@@ -14,10 +14,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (instancetype)sharedInstance;
 
-@property (readonly) BOOL secureEnclaveAvailable;
-
-- (id _Nullable)getSecureObject:(NSString*)identifier;
 - (BOOL)setSecureString:(NSString* _Nullable)string forIdentifier:(NSString*)identifier;
+
 - (NSString*_Nullable)getSecureString:(NSString*)identifier;
 
 @end

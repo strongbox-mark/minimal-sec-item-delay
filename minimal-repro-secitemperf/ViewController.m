@@ -28,7 +28,7 @@ static NSString* const kIdentifier = @"foo";
 - (IBAction)onGetSecret:(id)sender {
     NSTimeInterval startTime = NSDate.timeIntervalSinceReferenceDate;
 
-    id obj = [SecretStore.sharedInstance getSecureObject:kIdentifier];
+    id obj = [SecretStore.sharedInstance getSecureString:kIdentifier];
     
     NSTimeInterval perf = NSDate.timeIntervalSinceReferenceDate - startTime;
     
